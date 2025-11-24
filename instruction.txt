@@ -1,0 +1,80 @@
+// 2) créer sa fenêtre
+    display=al_create_display(800,600);
+//donner un nom à sa fenêtre
+    al_set_window_title( display, "Premier programme !");
+
+    // petit test : colorer la fenêtre en rouge
+    al_clear_to_color(al_map_rgb(255,0,0));
+
+al_flip_display(); qui sert a affiché tout ce que tu a dessiné
+Chapitre du livre a faire :
+ -III B clavier, souris, timer
+ -III C Dessin d'images et formes
+ -III D Texte
+ -III E Boutons et interactions
+ -III F timers
+ -III G son 
+ -IV Structure d'un jeux et organisations
+
+
+
+void al_draw_rectangle(float x1, float y1, float x2, float y2, ALLEGRO_COLOR color, float thickness)
+Trace un rectangle à partir des deux coins x ,y de la couleur color et de l'épaisseur thickness . Une épaisseur inférieure ou égale à 1 donne une épaisseur de 1.
+
+La fonction al_draw_filled_rectangle :
+
+ Sélectionnez
+void al_draw_filled_rectangle(float x1, float y1, float x2, float y2,ALLEGRO_COLOR color)
+void al_draw_text(const ALLEGRO_FONT *font, ALLEGRO_COLOR color, float x, float y, int flags, char const *text)
+Écrit la chaîne text dans la bitmap courante à la position x , y , selon la police font et de la couleur color . Le paramètre flag peut prendre les valeurs :
+
+ALLEGRO_ALIGN_LEFT : valeur 0, l'alignement est à gauche à partir de la position x, y donnée.
+
+ALLEGRO_ALIGN_CENTRE : centrage du texte autour de la position x, y donnée.
+
+ALLEGRO_ALIGN_RIGHT : alignement à droite sur la position x, y donnée.
+
+La fonction al_draw_justified_text :
+al_draw_justified_textf(const ALLEGRO_FONT *f, ALLEGRO_COLOR color, float x1, float x2, float y, float diff, int flags, const char *format, ...)
+
+
+
+
+Les évènements :
+
+ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
+al_register_event_source(queue, al_get_mouse_event_source());
+al_register_event_source(queue, al_get_display_event_source(display));
+
+while (var)
+{
+    ALLEGRO_EVENT event;
+    al_wait_for_event(queue, &event);  // Attend qu'un événement arrive
+    
+    // Analyser le type d'événement
+    if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+    {
+        // Un bouton de la souris a été pressé
+        int x = event.mouse.x;
+        int y = event.mouse.y;
+        int button = event.mouse.button;  // 1=gauche, 2=droit
+        
+        if(button == 1)
+        {
+            // Clic gauche
+        }
+        else if(button == 2)
+        {
+            var = false;  // Clic droit = quitter
+        }
+    }
+    else if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+    {
+        var = false;  // Fermeture de la fenêtre
+    }
+    
+    // Dessiner après avoir traité l'événement
+    al_clear_to_color(NOIR);
+    // ton dessin ici
+    al_flip_display();
+}
