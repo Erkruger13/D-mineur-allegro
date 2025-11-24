@@ -4,6 +4,7 @@
 
 
 int main(){
+    std::cout<<"Pour git !"<<std::endl;
     al_init();
     al_init_primitives_addon();
     al_install_mouse();
