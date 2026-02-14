@@ -14,12 +14,12 @@ int main(){
     ALLEGRO_COLOR color = BLEU;
     al_clear_to_color(color); 
     al_flip_display();
-    
+    std::cout<<"Bienvenu les garsss !"<<std::endl;
     Game partie(1, display);
     bool win = partie.partie();
     
     if(!win){
-        std::cout << "La partie est perdue mon pote" << std::endl;
+        std::cout << "La partie est perdue !" << std::endl;
     }
     else {
         std::cout << "Victoire !" << std::endl;
@@ -29,13 +29,8 @@ int main(){
     return 0;
 }
 
-// faire la fonction qui crée la liste d'objet en ajoutant a chaque fois leurs coordonée et en modifiant l'attribu bombe si il le sont
-//crée une fonction qui fait la matrice de la grille et une la matrice d'adjacence 
-// faut finir la liste objet et sensuite faire les fonctions des matrices d'adjaçanse et la matrice classique
-// on revois la fun d'affichage map
-// Pas besoin de placer un attribut nombre enfet il suffit de garder la matrice d'adjacant et de se servir de l'attribut coor pour connaitre le i,j de l'obj dans la mat
-// il faudra faire une class game
 /*S
 Déroulement d'une partie : Un objet game est appeler il crée des attributs avec la liste des bombes, les matrices, les cases
 La methode partie est appeler et ça lance une boucle qui reçoit les coordonées des clic et les donne
 */
+

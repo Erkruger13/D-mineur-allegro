@@ -338,6 +338,7 @@ bool clic(std::vector<std::vector<Carre>>& grille, Point point, std::vector<std:
     else if(c.nombre == 0){degats(grille, c.coor);}
     else {
         c.show = true;
+        degats(grille, c.coor);
         // faudra rajouter la fonction qui révèle les bails autour ici
     }
     
@@ -355,6 +356,89 @@ bool is_win(std::vector<std::vector<Carre>>& objet) {
     return true;
 }
 
+//fait par chat
+void animDefaite(std::vector<Point>& bombes, int taille_case = 50, int offsetX = 200, int offsetY = 100) {
+    for(auto& mine : bombes) {
+        int x_pixel = offsetX + mine.y * taille_case + taille_case / 2;
+        int y_pixel = offsetY + mine.x * taille_case + taille_case / 2;
+
+        for(int r = 5; r <= 20; r += 5) {
+            al_draw_filled_circle(x_pixel, y_pixel, r, ROUGE);
+            al_flip_display();
+            al_rest(0.05);
+        }
+    }
+
+    // Shake de la grille
+    for(int k = 0; k < 6; k++) {
+        int dx = (k % 2 == 0 ? 5 : -5);
+        int dy = (k % 2 == 0 ? -5 : 5);
+
+        ALLEGRO_TRANSFORM trans;
+        al_identity_transform(&trans);
+        al_translate_transform(&trans, dx, dy);
+        al_use_transform(&trans);
+
+        al_flip_display();
+        al_rest(0.03);
+    }
+
+    // Remettre l'affichage normal
+    ALLEGRO_TRANSFORM trans_reset;
+    al_identity_transform(&trans_reset);
+    al_use_transform(&trans_reset);
+
+    al_rest(1.0);
+}
+
+void animVictoire(std::vector<std::vector<Carre>>& grille, ALLEGRO_FONT* font, int taille_case = 50, int offsetX = 200, int offsetY = 100) {
+    struct Confetti {
+        float x, y;
+        ALLEGRO_COLOR color;
+        float speed;
+    };
+    
+    // Créer 50 confettis aléatoires
+    std::vector<Confetti> confettis;
+    for(int i = 0; i < 50; i++) {
+        confettis.push_back({
+            float(rand() % 800), // x aléatoire
+            float(-(rand() % 600)), // y au-dessus de l'écran
+            al_map_rgb(rand()%256, rand()%256, rand()%256),
+            float(2 + rand()%3) // vitesse
+        });
+    }
+
+    for(int frame = 0; frame < 100; frame++) { // 100 frames ≈ animation 5 sec
+        al_clear_to_color(BLEU);
+
+        // Afficher la grille
+        for(int i = 0; i < 12; i++) {
+            for(int j = 0; j < 12; j++) {
+                Carre& c = grille[i][j];
+                c.showed(font);
+
+                // Glow simple : rectangle blanc transparent qui clignote
+                if(frame % 20 < 10) {
+                    al_draw_filled_rectangle(c.p1.x, c.p1.y, c.p2.x, c.p2.y, al_map_rgba(255, 255, 255, 50));
+                }
+            }
+        }
+
+        // Déplacer et dessiner les confettis
+        for(auto& c : confettis) {
+            al_draw_filled_rectangle(c.x, c.y, c.x + 5, c.y + 5, c.color);
+            c.y += c.speed;
+            if(c.y > 600) c.y = -5; // recommencer en haut
+        }
+
+        al_flip_display();
+        al_rest(0.05); // ~20 FPS
+    }
+}
+
+
+
 class Game {
 public:
     std::vector<std::vector<int>> mat;
@@ -363,9 +447,13 @@ public:
     std::vector<std::vector<Carre>> objet;
     ALLEGRO_DISPLAY* display;
     ALLEGRO_FONT* font;
+    int flags_counter{0};
     
     Game(short int level, ALLEGRO_DISPLAY* disp) {
         bombe = Bombe(level);
+        for(auto& b: bombe){
+            std::cout<<"(" <<b.x<<", "<<b.y<<")"<<std::endl;
+        }
         display = disp;
         font = al_create_builtin_font();
         
@@ -417,7 +505,7 @@ public:
         al_clear_to_color(BLEU);
         map(objet, font);
         al_flip_display();
-        
+        std::cout<<"Avant les while"<<std::endl;
         while(win) {
             ALLEGRO_EVENT event;
             al_wait_for_event(queue, &event); 
@@ -429,8 +517,8 @@ public:
             
             if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
                 int bouton = event.mouse.button;
-                
-                if(bouton == 1) {
+                std::cout<<"Dans le while"<<std::endl;
+                if(bouton == 1) {//clic gauche
                     Point p(event.mouse.x, event.mouse.y);
                     win = clic(objet, p, mat_adj);
                     
@@ -439,13 +527,17 @@ public:
                         al_clear_to_color(BLEU);
                         game_over();
                         al_destroy_event_queue(queue);
-                        //degats(objet, p);// renvoyer au menu
+                        degats(objet, p);// renvoyer au menu
+                        std::cout<<"arreter a cause du break"<<std::endl;
+                        animDefaite(bombe);                 
                         return false;
                     }
                     
                     if(is_win(objet)) {
                         //Faudra mettre une animation de victoire et puis renvoyer au menu
-                        win = false;
+                        win = true;
+                        animVictoire(objet, font); // lancer l’animation
+                        return true;
                     }
                 }
                 else if(bouton == 2) {
@@ -467,9 +559,11 @@ public:
         }
         
         al_destroy_event_queue(queue);
-        return false;
+        return win;
     }
 };
+
+
 
 /* on vas faire le menu ici
 objectif présenter le menu donc un bouton pour choisir le level et un autre pour appuyer play
