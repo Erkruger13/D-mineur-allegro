@@ -1,9 +1,10 @@
 // afficher un texte centrer a l'endroit ou ne clique
 // bouton souris 0 : aucun ,  1 : gauche pressé, 2 : droite pressé, 3 : droit et gauche pressé, 4 : bouton du milieu presé 
 #include "Minesweeper.hpp"
-
+#include <ctime>
 
 int main(){
+    srand(time(NULL));
     al_init();
     al_init_primitives_addon();
     al_install_mouse();
